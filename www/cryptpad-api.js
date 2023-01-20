@@ -157,7 +157,7 @@
                 }
                 var container;
                 if (containerId) {
-                    container = document.getElementById('containerId');
+                    container = document.getElementById(containerId);
                 }
                 if (!container) {
                     console.warn('No container provided, append to body');
