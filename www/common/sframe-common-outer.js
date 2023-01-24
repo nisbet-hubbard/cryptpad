@@ -1927,6 +1927,19 @@ define([
                 }
             });
 
+            var integrationSave = function () {};
+            if (cfg.integration) {
+                // TODO
+                sframeChan.on('Q_INTEGRATION_SAVE', function (obj, cb) {
+                    if (cfg.integrationUtils && cfg.integrationUtils.save) {
+                        cfg.integrationUtils.save(obj, cb);
+                    }
+                });
+                integrationSave = function () {
+                    sframeChan.event('EV_INTEGRATION_NEEDSAVE');
+                };
+            }
+
             if (cfg.messaging) {
                 sframeChan.on('Q_CHAT_OPENPADCHAT', function (data, cb) {
                     Cryptpad.universal.execCommand({
@@ -2017,6 +2030,11 @@ define([
                         validateKey: secret.keys.validateKey
                     };
                 }
+                if (cfg.integration) {
+                    rtConfig.metadata = rtConfig.metadata || {};
+                    rtConfig.metadata.selfdestruct = true;
+                }
+
 
                 var cpNfCfg = {
                     sframeChan: sframeChan,
@@ -2037,6 +2055,13 @@ define([
                         }
                         if (readOnly || cfg.noHash) { return; }
                         replaceHash(Utils.Hash.getEditHashFromKeys(secret));
+                    },
+                    onError: function (err) {
+                        if (!cfg.integration) { return; }
+                        console.error(err);
+                        if (cfg.integrationUtils && cfg.integrationUtils.reload) {
+                            cfg.integrationUtils.reload();
+                        }
                     }
                 };
 
@@ -2090,9 +2115,7 @@ define([
                     metadata: {}
                 };
 
-                if (cfg.integration) {
-                    rtConfig.metadata.selfdestruct = true;
-                }
+                if (cfg.integration) { rtConfig.metadata.selfdestruct = true; }
 
                 if (data.team) {
                     Cryptpad.initialTeam = data.team.id;
