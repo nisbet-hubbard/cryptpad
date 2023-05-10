@@ -1,9 +1,5 @@
-define([
-    '/common/common-util.js',
-    '/api/config',
-    '/bower_components/tweetnacl/nacl-fast.min.js',
-], function (Util, ApiConfig) {
-    var Nacl = window.nacl;
+(function () {
+var factory = function (Util, Nacl) {
 
     var Block = {};
 
@@ -128,17 +124,17 @@ define([
         return Nacl.util.encodeBase64(u8).replace(/\//g, '-');
     };
 
-    Block.getBlockUrl = function (keys) {
+    Block.getBlockUrl = function (keys, fileHost) {
         var publicKey = urlSafeB64(keys.sign.publicKey);
         // 'block/' here is hardcoded because it's hardcoded on the server
         // if we want to make CryptPad work in server subfolders, we'll need
         // to update this path derivation
-        return (ApiConfig.fileHost || window.location.origin)
+        return (fileHost || (typeof(window) !== "undefined" && window.location.origin))
             + '/block/' + publicKey.slice(0, 2) + '/' +  publicKey;
     };
 
-    Block.getBlockHash = function (keys) {
-        var absolute = Block.getBlockUrl(keys);
+    Block.getBlockHash = function (keys, fileHost) {
+        var absolute = Block.getBlockUrl(keys, fileHost);
         var symmetric = urlSafeB64(keys.symmetric);
         return absolute + '#' + symmetric;
     };
@@ -171,4 +167,22 @@ define([
     };
 
     return Block;
-});
+};
+
+    if (typeof(module) !== 'undefined' && module.exports) {
+        module.exports = factory(
+            require('../common-util'),
+            require("tweetnacl/nacl-fast")
+        );
+    } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+        define([
+            '/common/common-util.js',
+            '/bower_components/tweetnacl/nacl-fast.min.js',
+        ], function (Util) {
+            return factory(Util, window.nacl);
+        });
+    } else {
+        // I'm not gonna bother supporting any other kind of instanciation
+    }
+
+})();

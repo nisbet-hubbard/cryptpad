@@ -1,11 +1,5 @@
-define([
-    '/common/common-constants.js',
-    '/common/common-hash.js',
-    '/common/outer/cache-store.js',
-    '/bower_components/localforage/dist/localforage.min.js',
-    '/customize/application_config.js',
-    '/common/common-util.js',
-], function (Constants, Hash, Cache, localForage, AppConfig, Util) {
+(function () {
+var factory = function (Constants, Hash, Cache, localForage, AppConfig, Util) {
     var LocalStore = {};
 
     var safeSet = function (key, val) {
@@ -17,13 +11,16 @@ define([
     };
 
     LocalStore.setThumbnail = function (key, value, cb) {
+        if (!localForage) { return void cb(); }
         localForage.setItem(key, value, cb);
     };
     LocalStore.getThumbnail = function (key, cb) {
+        if (!localForage) { return void cb(); }
         localForage.getItem(key, cb);
     };
     LocalStore.clearThumbnail = function (cb) {
         cb = cb || function () {};
+        if (!localForage) { return void cb(); }
         localForage.clear(cb);
     };
 
@@ -182,4 +179,26 @@ define([
 
 
     return LocalStore;
-});
+};
+
+if (typeof(module) !== 'undefined' && module.exports) {
+    module.exports = factory(
+        require("../common-constants"),
+        require("../common-hash"),
+        { clear: function () {} }, // Cache stub
+        undefined, // localForage
+        {}, // XXX AppConfig stub
+        require("../common-util")
+    );
+} else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+    define([
+        '/common/common-constants.js',
+        '/common/common-hash.js',
+        '/common/outer/cache-store.js',
+        '/bower_components/localforage/dist/localforage.min.js',
+        '/customize/application_config.js',
+        '/common/common-util.js',
+    ], factory);
+}
+
+})();

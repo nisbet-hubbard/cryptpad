@@ -365,6 +365,22 @@
         };
     };
 
+    if (typeof module !== 'undefined' && module.exports) {
+        Util.fetch = function (src, cb) {
+            var CB = Util.once(Util.mkAsync(cb));
+            fetch(src).then(function (response) {
+                if (!response.ok) {
+                    throw new Error(`HTTP error`);
+                }
+                return response.arrayBuffer();
+            }).catch(function (err) {
+                CB(err);
+            }).then(function (u8) {
+                CB(void 0, new Uint8Array(u8));
+            });
+        };
+    }
+
     Util.dataURIToBlob = function (dataURI) {
         var byteString = atob(dataURI.split(',')[1]);
         var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];

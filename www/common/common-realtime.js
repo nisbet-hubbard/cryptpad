@@ -1,4 +1,5 @@
-define([], function () {
+(function () {
+var factory = function () {
     var common = {};
 
     /*
@@ -18,4 +19,12 @@ define([], function () {
     };
 
     return common;
-});
+};
+
+if (typeof(module) !== 'undefined' && module.exports) {
+    module.exports = factory();
+} else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+    define([], factory);
+}
+
+})();

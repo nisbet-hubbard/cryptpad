@@ -1,4 +1,5 @@
-define(['/customize/application_config.js'], function (AppConfig) {
+(function () {
+var factory = function (AppConfig) {
     return {
         // localStorage
         userHashKey: 'User_hash',
@@ -20,4 +21,16 @@ define(['/customize/application_config.js'], function (AppConfig) {
         criticalApps: ['profile', 'settings', 'debug', 'admin', 'support', 'notifications', 'calendar'],
         earlyAccessApps: ['doc', 'presentation']
     };
-});
+};
+
+if (typeof(module) !== 'undefined' && module.exports) {
+    module.exports = factory(
+        {}, // XXX AppConfig stub
+    );
+} else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+    define([
+        '/customize/application_config.js',
+    ], factory);
+}
+
+})();
