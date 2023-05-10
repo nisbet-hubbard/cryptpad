@@ -306,7 +306,7 @@ define([
 
         var opt = Login.allocateBytes(bytes);
 
-        var blockUrl = Login.Block.getBlockUrl(opt.blockKeys);
+        var blockUrl = Login.Block.getBlockUrl(opt.blockKeys, ApiConfig.fileHost);
         var blockRequest = Login.Block.serialize("{}", opt.blockKeys);
         var removeRequest = Login.Block.remove(opt.blockKeys);
         console.warn('Testing block URL (%s). One 404 is normal.', blockUrl);

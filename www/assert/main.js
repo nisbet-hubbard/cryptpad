@@ -311,7 +311,7 @@ define([
 
     assert(function (cb) {
         var keys = Block.genkeys(Nacl.randomBytes(64));
-        var hash = Block.getBlockHash(keys);
+        var hash = Block.getBlockHash(keys, ApiConfig.fileHost);
         var parsed = Block.parseBlockHash(hash);
 
         cb(parsed &&
