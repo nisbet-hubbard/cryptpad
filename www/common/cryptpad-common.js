@@ -2048,7 +2048,7 @@ define([
                 blockKeys = allocated.blockKeys;
             }));
         }).nThen(function (waitFor) {
-            var blockUrl = Block.getBlockUrl(blockKeys, ApiConfig.fileHost);
+            var blockUrl = Block.getBlockUrl(blockKeys, Config.fileHost);
             // Check whether there is a block at that location
             Util.fetch(blockUrl, waitFor(function (err, block) {
                 // If there is no block or the block is invalid, continue.
@@ -2092,7 +2092,7 @@ define([
                 }
             }));
         }).nThen(function (waitFor) {
-            var blockUrl = Block.getBlockUrl(blockKeys, ApiConfig.fileHost);
+            var blockUrl = Block.getBlockUrl(blockKeys, Config.fileHost);
             Util.fetch(blockUrl, waitFor(function (err /* block */) {
                 if (err) {
                     console.error(err);
@@ -2102,7 +2102,7 @@ define([
                     });
                 }
                 console.log("new login block written");
-                var newBlockHash = Block.getBlockHash(blockKeys, ApiConfig.fileHost);
+                var newBlockHash = Block.getBlockHash(blockKeys, Config.fileHost);
                 LocalStore.setBlockHash(newBlockHash);
             }));
         }).nThen(function (waitFor) {

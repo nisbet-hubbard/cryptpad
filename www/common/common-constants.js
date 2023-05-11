@@ -25,7 +25,7 @@ var factory = function (AppConfig) {
 
 if (typeof(module) !== 'undefined' && module.exports) {
     module.exports = factory(
-        {}, // XXX AppConfig stub
+        {} // XXX AppConfig stub
     );
 } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
     define([
