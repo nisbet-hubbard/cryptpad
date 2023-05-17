@@ -39,6 +39,8 @@
     "lesshint": "6.3.7"
   },
   "overrides": {
+    "minimatch": "~3.0.8",
+    "minimist": "~1.2.3",
     "glob-parent": "5.1.2",
     "set-value": "4.0.1"
   },
