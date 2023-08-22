@@ -14,6 +14,7 @@ var config = require("./lib/load-config");
 var Environment = require("./lib/env");
 var Env = Environment.create(config);
 var Default = require("./lib/defaults");
+var Monitoring = require('./lib/monitoring');
 
 var app = Express();
 
@@ -46,6 +47,11 @@ COMMANDS.UPDATE_QUOTA = function (msg, cb) {
 
 COMMANDS.GET_PROFILING_DATA = function (msg, cb) {
     cb(void 0, Env.bytesWritten);
+};
+
+COMMANDS.MONITORING = function (msg, cb) {
+    Monitoring.applyToEnv(Env, msg.data);
+    cb();
 };
 
 nThen(function (w) {
@@ -99,6 +105,7 @@ nThen(function (w) {
 
     var launchWorker = (online) => {
         var worker = Cluster.fork(workerState);
+        var pid = worker.process.pid;
         worker.on('online', () => {
             online();
         });
@@ -128,6 +135,7 @@ nThen(function (w) {
         });
 
         worker.on('exit', (code, signal) => {
+            Monitoring.remove(Env, pid);
             if (!signal && code === 0) { return; }
             // relaunch http workers if they crash
             Env.Log.error('HTTP_WORKER_EXIT', {
@@ -169,6 +177,11 @@ nThen(function (w) {
         Env.Log.info('WORKER_CACHE_FLUSH', 'Instructing HTTP workers to flush cache');
         broadcast('FLUSH_CACHE', Env.FRESH_KEY);
     }, 250);
+
+    setInterval(() => {
+        Monitoring.applyToEnv(Env, Monitoring.getData('main'));
+        broadcast('MONITORING', Env.monitoring);
+    }, Monitoring.interval);
 
     Env.envUpdated.reg(throttledEnvChange);
     Env.cacheFlushed.reg(throttledCacheFlush);
