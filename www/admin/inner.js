@@ -434,7 +434,7 @@ Messages.admin_channelPlaceholder = "Destroyed document placeholder";
         }
 
         // currently online
-        row(Messages.admin_currentlyOnline, data.currentlyOnline);
+        row(Messages.admin_currentlyOnline, localizeState(data.currentlyOnline));
 
         // plan name
         row(Messages.admin_planName, data.plan || Messages.ui_none);
