@@ -1266,6 +1266,15 @@ define([
                     });
                 });
 
+                sframeChan.on('Q_PIN_GET_USAGE', function (teamId, cb) {
+                    Cryptpad.isOverPinLimit(teamId, function (err, overLimit, data) {
+                        cb({
+                            error: err,
+                            data: data
+                        });
+                    });
+                });
+
                 sframeChan.on('Q_PASSWORD_CHECK', function (pw, cb) {
                     Cryptpad.isNewChannel(currentPad.href, pw, function (e, isNew) {
                         if (isNew === false) {
@@ -1302,16 +1311,6 @@ define([
                         });
                     });
                 });
-
-                sframeChan.on('Q_PIN_GET_USAGE', function (teamId, cb) {
-                    Cryptpad.isOverPinLimit(teamId, function (err, overLimit, data) {
-                        cb({
-                            error: err,
-                            data: data
-                        });
-                    });
-                });
-
             };
             addCommonRpc(sframeChan, isSafe);
 
