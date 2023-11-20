@@ -126,6 +126,9 @@
                 };
 
                 var getSession = function (cb) {
+                    if (!config.events.onNewKey) {
+                        return void cb();
+                    }
                     chan.send('GET_SESSION', {
                         key: key
                     }, function (obj) {
@@ -167,6 +170,14 @@
             });
         };
 
+
+        var getInstanceURL = () => {
+            var scripts = document.getElementsByTagName('script');
+            for (var i = scripts.length - 1; i >= 0; i--) {
+                match = scripts[i].src.match(/(.*)web-apps\/apps\/api\/documents\/api.js/i);
+                if (match) { return match[1]; }
+            }
+        };
         /**
          * Create a CryptPad collaborative editor for the provided document.
          *
@@ -183,7 +194,9 @@
          *   @param {string} config.documentType The editor to load in CryptPad.
          * @return {promise}
          */
-        var init = function (cryptpadURL, containerId, config) {
+        var init = function (containerId, config) {
+            var cryptpadURL = getInstanceURL();
+            console.warn('URL', url);
             return new Promise(function (resolve, reject) {
             setTimeout(function () {
 
@@ -244,7 +257,9 @@
             });
         };
 
-        return init;
+        return {
+            DocEditor: init
+        };
     };
 
 
@@ -256,7 +271,7 @@
             return factory();
         });
     } else {
-        window.CryptPadAPI = factory();
+        window.DocsAPI = window.CryptPadAPI = factory();
     }
 }());
 

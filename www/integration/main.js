@@ -91,6 +91,14 @@ define([
             http.send();
         };
         chan.on('GET_SESSION', function (data, cb) {
+            console.error(data);
+            if (data.keepOld) {
+                var key = data.key + "000000000000000000000000000000000";
+                console.warn('KEY', key);
+                return void cb({
+                    key: `/2/integration/edit/${key.slice(0,24)}/`
+                });
+            }
             var getHash = function () {
                 isNew = true;
                 return Hash.createRandomHash('integration');
