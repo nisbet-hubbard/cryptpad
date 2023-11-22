@@ -126,7 +126,7 @@ define([
             function (yes) {
                 if (!yes) { return; }
 
-                Login.loginOrRegisterUI(uname, passwd, true, shouldImport, false, function (data) {
+                Login.loginOrRegisterUI(uname, passwd, true, shouldImport, false, false, function (data) {
                     var proxy = data.proxy;
                     if (!proxy || !proxy.edPublic) { UI.alert(Messages.error); return true; }
 
