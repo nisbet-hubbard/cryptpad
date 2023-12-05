@@ -641,7 +641,7 @@ define([
         var $trashTreeContextMenu = $("#cp-app-drive-context-trashtree");
         var $trashContextMenu = $("#cp-app-drive-context-trash");
 
-
+        $content.attr("tabindex", "0");
         var splitter = h('div.cp-splitter', [
             h('i.fa.fa-ellipsis-v')
         ]);
@@ -2815,7 +2815,7 @@ define([
             var content = h('div', [
                 h('h4', Messages.sharedFolders_create),
                 h('label', {for: 'cp-app-drive-sf-name'}, Messages.sharedFolders_create_name),
-                h('input#cp-app-drive-sf-name', {type: 'text', placeholder: Messages.fm_newFolder}),
+                h('input#cp-app-drive-sf-name', {type: 'text', placeholder: Messages.fm_newFolder,tabindex:'1'}),
                 h('label', {for: 'cp-app-drive-sf-password'}, Messages.fm_shareFolderPassword),
                 UI.passwordInput({id: 'cp-app-drive-sf-password'}),
                 h('span', {
@@ -2885,9 +2885,9 @@ define([
             ]);
             var content = h('p', [
                 h('label', {for: 'cp-app-drive-link-name'}, Messages.fm_link_name),
-                name = h('input#cp-app-drive-link-name', { autocomplete: 'off', placeholder: Messages.fm_link_name_placeholder }),
+                name = h('input#cp-app-drive-link-name', { autocomplete: 'off', placeholder: Messages.fm_link_name_placeholder, tabindex:'1'}),
                 h('label', {for: 'cp-app-drive-link-url'}, Messages.fm_link_url),
-                url = h('input#cp-app-drive-link-url', { type: 'url', autocomplete: 'off', placeholder: Messages.form_input_ph_url }),
+                url = h('input#cp-app-drive-link-url', { type: 'url', autocomplete: 'off', placeholder: Messages.form_input_ph_url,tabindex:'1'}),
                 warning,
             ]);
 
@@ -2960,29 +2960,56 @@ define([
                     refresh();
                 };
                 $block.find('a.cp-app-drive-new-folder, li.cp-app-drive-new-folder')
-                    .click(function () {
-                    manager.addFolder(currentPath, null, onCreated);
-                });
+                    .on('click keypress', function (event) {
+                        if (event.type === 'click' || (event.type === 'keypress' && event.which === 13)) {
+                            event.preventDefault();
+                            manager.addFolder(currentPath, null, onCreated);
+                        }
+                    });
                 if (!APP.disableSF && !manager.isInSharedFolder(currentPath)) {
                     $block.find('a.cp-app-drive-new-shared-folder, li.cp-app-drive-new-shared-folder')
-                        .click(function () {
-                        addSharedFolderModal(function (obj) {
-                            if (!obj) { return; }
-                            manager.addSharedFolder(currentPath, obj, refresh);
+                        .on('click keypress', function (event) {
+                            if (event.type === 'click' || (event.type === 'keypress' && event.which === 13)) {
+                                event.preventDefault();
+                                addSharedFolderModal(function (obj) {
+                                    if (!obj) { return; }
+                                    manager.addSharedFolder(currentPath, obj, refresh);
+                                });
+                            }
                         });
-                    });
                 }
-                $block.find('a.cp-app-drive-new-fileupload, li.cp-app-drive-new-fileupload').click(showUploadFilesModal);
-                $block.find('a.cp-app-drive-new-folderupload, li.cp-app-drive-new-folderupload').click(showUploadFolderModal);
-                $block.find('a.cp-app-drive-new-link, li.cp-app-drive-new-link').click(showLinkModal);
+                $block.find('a.cp-app-drive-new-fileupload, li.cp-app-drive-new-fileupload')
+                    .on('click keypress', function (event) {
+                        if (event.type === 'click' || (event.type === 'keypress' && event.which === 13)) {
+                            event.preventDefault();
+                            showUploadFilesModal();
+                        }
+                    });
+                $block.find('a.cp-app-drive-new-folderupload, li.cp-app-drive-new-folderupload')
+                    .on('click keypress', function (event) {
+                        if (event.type === 'click' || (event.type === 'keypress' && event.which === 13)) {
+                            event.preventDefault();
+                            showUploadFolderModal();
+                        }
+                    });
+                $block.find('a.cp-app-drive-new-link, li.cp-app-drive-new-link')
+                    .on('click keypress', function (event) {
+                        if (event.type === 'click' || (event.type === 'keypress' && event.which === 13)) {
+                            event.preventDefault();
+                            showLinkModal();
+                        }
+                    });
             }
             $block.find('a.cp-app-drive-new-doc, li.cp-app-drive-new-doc')
-                .on('click auxclick', function (e) {
-                e.preventDefault();
-                var type = $(this).attr('data-type') || 'pad';
-                var path = manager.isPathIn(currentPath, [TRASH]) ? '' : currentPath;
-                openIn(type, path, APP.team);
-            });
+                .on('click auxclick keypress', function (event) {
+                    if (event.type === 'click' || event.type === 'auxclick' || (event.type === 'keypress' && event.which === 13))
+                    {
+                        event.preventDefault();
+                        var type = $(this).attr('data-type') || 'pad';
+                        var path = manager.isPathIn(currentPath, [TRASH]) ? '' : currentPath;
+                        openIn(type, path, APP.team);
+                    }
+                });
         };
         var getNewPadOptions = function (isInRoot) {
             var options = [];
@@ -3065,18 +3092,24 @@ define([
 
             // Create dropdown
             var options = getNewPadOptions(isInRoot).map(function (obj) {
-                if (obj.separator) { return { tag: 'hr' }; }
+                if (obj.separator) {
+                    return { tag: 'hr', };
+                }
+
                 var newObj = {
                     tag: 'a',
-                    attributes: { 'class': obj.class },
-                    content: [ obj.icon, obj.name ]
+                    attributes: { 'class': obj.class, href: '#' },
+                    content: [obj.icon, obj.name]
                 };
+
                 if (obj.type) {
                     newObj.attributes['data-type'] = obj.type;
                     newObj.attributes['href'] = APP.origin + Hash.hashToHref('', obj.type);
                 }
+
                 return newObj;
             });
+
             var dropdownConfig = {
                 buttonContent: [
                     h('i.fa.fa-plus'),
@@ -3090,13 +3123,13 @@ define([
             var $block = UIElements.createDropdown(dropdownConfig);
 
             // Custom style:
-            $block.find('button').addClass('cp-app-drive-toolbar-new');
-
+            // actions for +New menu button
+            var menuButton = $block.find('button');
+            menuButton.addClass('cp-app-drive-toolbar-new');
             addNewPadHandlers($block, isInRoot);
 
             $container.append($block);
         };
-
         var createFilterButton = function (isTemplate, $container) {
             if (!APP.loggedIn) { return; }
 
@@ -3107,6 +3140,7 @@ define([
                     tag: 'a',
                     attributes: {
                         'class': 'cp-app-drive-rm-filter',
+                        'href': '#'
                     },
                     content: [
                         h('i.fa.fa-times'),
@@ -3117,6 +3151,7 @@ define([
             }
             getNewPadTypes().forEach(function (type) {
                 var attributes = {
+                    'role': 'menuitem',
                     'class': 'cp-app-drive-filter-doc',
                     'data-type': type,
                     'href': '#'
@@ -3134,7 +3169,7 @@ define([
                     attributes: attributes,
                     content: [
                         getIcon(type)[0],
-                        Messages.type[type],
+                        Messages.type[type]
                     ],
                 });
             });
@@ -3143,24 +3178,27 @@ define([
                 options.push({
                     tag: 'a',
                     attributes: {
+                        'role': 'menuitem',
                         'class': 'cp-app-drive-filter-doc',
-                        'data-type': 'link'
+                        'data-type': 'link',
+                        'href': '#'
                     },
                     content: [
                         getIcon('link')[0],
-                        Messages.fm_link_type,
+                        Messages.fm_link_type
                     ],
                 });
                 options.push({
                     tag: 'a',
                     attributes: {
+                        'role': 'menuitem',
                         'class': 'cp-app-drive-filter-doc',
                         'data-type': 'file',
                         'href': '#'
                     },
                     content: [
                         getIcon('file')[0],
-                        Messages.type['file'],
+                        Messages.type['file']
                     ],
                 });
             }
@@ -3278,6 +3316,7 @@ define([
                     h('i.fa.fa-minus'),
                     Messages.fm_type,
                 ],
+                action: function (e) { onSortByClick.call($(e.target).find('a')[0]); }
             },{
                 tag: 'a',
                 attributes: {'class': 'cp-app-drive-element-atime'},
@@ -3285,6 +3324,7 @@ define([
                     h('i.fa.fa-minus'),
                     Messages.fm_lastAccess,
                 ],
+                action: function (e) { onSortByClick.call($(e.target).find('a')[0]); }
             },{
                 tag: 'a',
                 attributes: {'class': 'cp-app-drive-element-ctime'},
@@ -3292,6 +3332,7 @@ define([
                     h('i.fa.fa-minus'),
                     Messages.fm_creation,
                 ],
+                action: function (e) { onSortByClick.call($(e.target).find('a')[0]); }
             }];
             var dropdownConfig = {
                 text: '', // Button initial text
@@ -3303,7 +3344,6 @@ define([
             };
             var $sortBlock = UIElements.createDropdown(dropdownConfig);
             $sortBlock.find('button').append(h('span.fa.fa-sort-amount-desc')).append(h('span', Messages.fm_sort));
-            $sortBlock.on('click', 'a', onSortByClick);
             return $fhSort;
         };
         var getFolderListHeader = function (clickable, small) {
@@ -3484,16 +3524,16 @@ define([
 
         // Create the ghost icon to add pads/folders
         var createNewPadIcons = function ($block, isInRoot) {
-            var $container = $('<div>');
+            var $container = $('<ul>');
             getNewPadOptions(isInRoot).forEach(function (obj) {
                 if (obj.separator) { return; }
 
                 var $element = $('<li>', {
                     'class': obj.class + ' cp-app-drive-element-row ' +
-                             'cp-app-drive-element-grid'
+                        'cp-app-drive-element-grid',
+                        'tabindex': 1
                 }).prepend(obj.icon).appendTo($container);
-                $element.append($('<span>', { 'class': 'cp-app-drive-new-name' })
-                    .text(obj.name));
+                $element.append($('<span>', { 'class': 'cp-app-drive-new-name' }).text(obj.name));
 
                 if (obj.type) {
                     $element.attr('data-type', obj.type);
@@ -4348,9 +4388,12 @@ define([
             $icon.css("color", isSharedFolder ? getFolderColor(path.slice(0, -1)) : getFolderColor(path));
             var $collapse;
             if (collapsable) {
-                $collapse = $expandIcon.clone();
+                $collapse = $expandIcon.clone().attr('tabindex', 0);
             }
-            var $elementRow = $('<span>', {'class': 'cp-app-drive-element-row'}).append($collapse).append($icon).append($name).click(function (e) {
+            var $elementRow = $('<span>', {'class': 'cp-app-drive-element-row', 'tabindex': 0}).append($collapse).append($icon).append($name).on('click keypress', function (e) {
+                if (e.type === 'keypress' && e.which !== 13) {
+                    return;
+                }
                 e.stopPropagation();
                 if (isSharedFolder && !manager.folders[isSharedFolder]) {
                     UI.warn(Messages.fm_deletedFolder);
@@ -4373,7 +4416,10 @@ define([
             if (draggable) { $elementRow.attr('draggable', true); }
             if (collapsable) {
                 $element.addClass('cp-app-drive-element-collapsed');
-                $collapse.click(function(e) {
+                $collapse.on('click keypress', function(e) {
+                    if (e.type === 'keypress' && e.which !== 13) {
+                        return;
+                    }
                     e.stopPropagation();
                     if ($element.hasClass('cp-app-drive-element-collapsed')) {
                         // It is closed, open it
